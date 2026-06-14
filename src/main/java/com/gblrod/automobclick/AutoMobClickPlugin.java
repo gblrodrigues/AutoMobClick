@@ -3,10 +3,12 @@ package com.gblrod.automobclick;
 import com.gblrod.automobclick.command.AutoMobClickCommand;
 import com.gblrod.automobclick.config.MobConfigurationService;
 import com.gblrod.automobclick.listener.MobDeathListener;
+import com.gblrod.automobclick.listener.PlayerConnectionListener;
 import com.gblrod.automobclick.presentation.AutoclickMessageService;
 import com.gblrod.automobclick.presentation.StatisticsMessageService;
 import com.gblrod.automobclick.service.AutoMobClickService;
 import com.gblrod.automobclick.service.MobStatisticsService;
+import com.gblrod.automobclick.service.PlayerStatisticsStorageService;
 import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,6 +18,7 @@ import java.util.Set;
 
 public class AutoMobClickPlugin extends JavaPlugin {
     private AutoMobClickService autoClickService;
+    private MobStatisticsService statisticsService;
 
     @Override
     public void onEnable() {
@@ -24,13 +27,13 @@ public class AutoMobClickPlugin extends JavaPlugin {
         AutoclickMessageService autoclickMessageService = new AutoclickMessageService();
         Set<EntityType> allowedMobs = mobConfigurationService.getAllowedMobs();
 
-        autoClickService = new AutoMobClickService(
-                this,
-                autoclickMessageService,
-                allowedMobs
-        );
-        MobStatisticsService statisticsService = new MobStatisticsService();
+        PlayerStatisticsStorageService storageService = new PlayerStatisticsStorageService(this);
+        storageService.initialize();
 
+        statisticsService = new MobStatisticsService(storageService);
+        getServer().getPluginManager().registerEvents(new PlayerConnectionListener(statisticsService), this);
+
+        autoClickService = new AutoMobClickService(this, autoclickMessageService, allowedMobs);
         StatisticsMessageService statisticsMessageService = new StatisticsMessageService(statisticsService);
 
         Objects.requireNonNull(getCommand("automobclick")).setExecutor(
@@ -51,6 +54,10 @@ public class AutoMobClickPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (statisticsService != null) {
+            statisticsService.saveAll();
+        }
+
         Optional.ofNullable(autoClickService).ifPresent(AutoMobClickService::shutdown);
     }
 }
