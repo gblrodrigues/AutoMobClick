@@ -1,0 +1,11 @@
+name: AutoMobClick
+version: 1.0.0
+main: com.gblrod.automobclick.AutoMobClickPlugin
+api-version: '1.21'
+
+commands:
+  automobclick:
+    description: Toggle Auto Mob Click
+    aliases:
+      - autoclick
+      - ac
