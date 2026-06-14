@@ -2,15 +2,12 @@ package com.gblrod.automobclick.model;
 
 import org.bukkit.entity.EntityType;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public enum MobDisplayName {
     ZOMBIE(EntityType.ZOMBIE, "Zumbi"),
     IRON_GOLEM(EntityType.IRON_GOLEM, "Golem"),
-    SLIME(EntityType.SLIME, "Slime"),
-    PIG(EntityType.PIG, "Porco");
+    PIG(EntityType.PIG, "Porco"),
+    BREEZE(EntityType.BREEZE, "Vórtice"),
+    BLAZE(EntityType.BLAZE, "Blaze");
 
     private final EntityType entityType;
     private final String displayName;
@@ -26,11 +23,5 @@ public enum MobDisplayName {
 
     public String getDisplayName() {
         return displayName;
-    }
-
-    public static Set<EntityType> supportedTypes() {
-        return Arrays.stream(values())
-                .map(MobDisplayName::getEntityType)
-                .collect(Collectors.toSet());
     }
 }
