@@ -1,9 +1,7 @@
 package com.gblrod.automobclick.service;
 
-import com.gblrod.automobclick.model.MobDisplayName;
 import com.gblrod.automobclick.presentation.AutoclickMessageService;
 import org.bukkit.GameMode;
-import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -22,6 +20,7 @@ public class AutoMobClickService {
     private final Map<UUID, BukkitTask> activeTasks = new HashMap<>();
     private static final long AC_TICKS = 2L;
     private final AutoclickMessageService messageService;
+    private final Set<EntityType> allowedMobs;
 
     private boolean isInvalidPlayer(Player player) {
         return !player.isOnline() || player.isDead() || player.getGameMode() == GameMode.SPECTATOR;
@@ -31,14 +30,14 @@ public class AutoMobClickService {
         return activeTasks.containsKey(player.getUniqueId());
     }
 
-    private final Set<EntityType> allowedMobs = MobDisplayName.supportedTypes();
-
     public AutoMobClickService(
             JavaPlugin plugin,
-            AutoclickMessageService messageService
+            AutoclickMessageService messageService,
+            Set<EntityType> allowedMobs
     ) {
         this.plugin = plugin;
         this.messageService = messageService;
+        this.allowedMobs = allowedMobs;
     }
 
     public void toggle(Player player) {

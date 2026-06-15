@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 public class AutoMobClickCommand implements CommandExecutor {
-
     private final AutoMobClickService autoClickService;
     private final StatisticsMessageService statisticsMessageService;
 
