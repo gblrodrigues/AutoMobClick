@@ -1,6 +1,17 @@
+settings:
+  statistics_window_minutes: 5
+
 allowed-mobs:
   - ZOMBIE
   - IRON_GOLEM
   - BLAZE
   - PIG
   - BREEZE
+
+messages:
+  ac_enabled: "<aqua><bold>AUTOCLICK!</bold> <yellow>Você <green>ativou <yellow>o AutoClick."
+  ac_disabled: "<aqua><bold>AUTOCLICK!</bold> <yellow>Você <red>desativou <yellow>o AutoClick."
+  ac_no_stats: "<aqua><bold>AUTOCLICK!</bold> <red>Você não eliminou nenhum mob nos últimos <yellow>%minutes%m<red>."
+  stats_mob_line: "<aqua> ▶ <yellow>%mob%: <green>%amount%"
+  ac_stats_header: "<aqua><bold>AUTOCLICK!</bold> <yellow>Você eliminou <green>%total% mobs <yellow>nos últimos <green>%minutes%m<yellow>:"
+  ac_next_expiration: "<aqua> 🕛 <gray>Próxima expiração: <red>%mob% <gray>em <red>%time%"

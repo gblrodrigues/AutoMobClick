@@ -1,12 +1,13 @@
 package com.gblrod.automobclick.service;
 
+import com.gblrod.automobclick.dto.NextExpiration;
 import org.bukkit.entity.EntityType;
 
 import java.util.*;
 
 public class MobStatisticsService {
-    private static final long FIVE_MINUTES = 5 * 60 * 1000L;
     private final Map<UUID, Map<EntityType, List<Long>>> kills = new HashMap<>();
+    private final long statisticsWindowMillis;
     private final PlayerStatisticsStorageService storageService;
 
     public void registerKill(UUID playerId, EntityType entityType) {
@@ -26,7 +27,7 @@ public class MobStatisticsService {
         long now = System.currentTimeMillis();
 
         playerKills.values().forEach(list ->
-                list.removeIf(timestamp -> now - timestamp > FIVE_MINUTES)
+                list.removeIf(timestamp -> now - timestamp > statisticsWindowMillis)
         );
 
         playerKills.entrySet().removeIf(entry -> entry.getValue().isEmpty());
@@ -62,7 +63,8 @@ public class MobStatisticsService {
                 .sum();
     }
 
-    public MobStatisticsService(PlayerStatisticsStorageService storageService) {
+    public MobStatisticsService(long statisticsWindowMillis, PlayerStatisticsStorageService storageService) {
+        this.statisticsWindowMillis = statisticsWindowMillis;
         this.storageService = storageService;
     }
 
@@ -95,5 +97,38 @@ public class MobStatisticsService {
         }
 
         cleanup(playerId);
+    }
+
+    public NextExpiration getNextExpiration(UUID playerId) {
+        cleanup(playerId);
+
+        Map<EntityType, List<Long>> playerKills = kills.get(playerId);
+
+        if (playerKills == null) {
+            return null;
+        }
+
+        EntityType nextEntityType = null;
+        long oldestTimestamp = Long.MAX_VALUE;
+
+        for (var entry : playerKills.entrySet()) {
+            for (Long timestamp : entry.getValue()) {
+                if (timestamp < oldestTimestamp) {
+                    oldestTimestamp = timestamp;
+                    nextEntityType = entry.getKey();
+                }
+            }
+        }
+
+        if (nextEntityType == null) {
+            return null;
+        }
+
+        long remaining = (oldestTimestamp + statisticsWindowMillis) - System.currentTimeMillis();
+
+        return new NextExpiration(
+                nextEntityType,
+                Math.max(remaining, 0L)
+        );
     }
 }
