@@ -7,6 +7,7 @@ import com.gblrod.automobclick.listener.PlayerConnectionListener;
 import com.gblrod.automobclick.presentation.AutoclickMessageService;
 import com.gblrod.automobclick.presentation.StatisticsMessageService;
 import com.gblrod.automobclick.service.AutoMobClickService;
+import com.gblrod.automobclick.service.MessageService;
 import com.gblrod.automobclick.service.MobStatisticsService;
 import com.gblrod.automobclick.service.PlayerStatisticsStorageService;
 import org.bukkit.entity.EntityType;
@@ -23,18 +24,31 @@ public class AutoMobClickPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        MessageService messageService = new MessageService(getConfig());
+
+        long statisticsWindowMinutes = getConfig().getLong("settings.statistics_window_minutes", 5);
+        long statisticsWindowMillis = statisticsWindowMinutes * 60_000L;
+
         MobConfigurationService mobConfigurationService = new MobConfigurationService(getConfig(), getLogger());
-        AutoclickMessageService autoclickMessageService = new AutoclickMessageService();
+        AutoclickMessageService autoclickMessageService = new AutoclickMessageService(messageService);
         Set<EntityType> allowedMobs = mobConfigurationService.getAllowedMobs();
 
         PlayerStatisticsStorageService storageService = new PlayerStatisticsStorageService(this);
         storageService.initialize();
 
-        statisticsService = new MobStatisticsService(storageService);
+        statisticsService = new MobStatisticsService(
+                statisticsWindowMillis,
+                storageService
+        );
+
         getServer().getPluginManager().registerEvents(new PlayerConnectionListener(statisticsService), this);
 
         autoClickService = new AutoMobClickService(this, autoclickMessageService, allowedMobs);
-        StatisticsMessageService statisticsMessageService = new StatisticsMessageService(statisticsService);
+        StatisticsMessageService statisticsMessageService = new StatisticsMessageService(
+                statisticsService,
+                messageService,
+                statisticsWindowMinutes
+        );
 
         Objects.requireNonNull(getCommand("automobclick")).setExecutor(
                 new AutoMobClickCommand(
