@@ -24,4 +24,14 @@ public enum MobDisplayName {
     public String getDisplayName() {
         return displayName;
     }
+
+    public static String getDisplayName(EntityType entityType) {
+        for (MobDisplayName mob : values()) {
+            if (mob.entityType == entityType) {
+                return mob.displayName;
+            }
+        }
+
+        return entityType.name();
+    }
 }

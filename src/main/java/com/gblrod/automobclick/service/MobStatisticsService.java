@@ -1,5 +1,6 @@
 package com.gblrod.automobclick.service;
 
+import com.gblrod.automobclick.dto.NextExpiration;
 import org.bukkit.entity.EntityType;
 
 import java.util.*;
@@ -95,5 +96,42 @@ public class MobStatisticsService {
         }
 
         cleanup(playerId);
+    }
+
+    public Optional<NextExpiration> getNextExpiration(UUID playerId) {
+        cleanup(playerId);
+
+        Map<EntityType, List<Long>> playerKills = kills.get(playerId);
+
+        if (playerKills == null) {
+            return Optional.empty();
+        }
+
+        EntityType nextEntityType = null;
+        long oldestTimestamp = Long.MAX_VALUE;
+
+        for (var entry : playerKills.entrySet()) {
+            for (Long timestamp : entry.getValue()) {
+                if (timestamp < oldestTimestamp) {
+                    oldestTimestamp = timestamp;
+                    nextEntityType = entry.getKey();
+                }
+            }
+        }
+
+        if (nextEntityType == null) {
+            return Optional.empty();
+        }
+
+        long remaining =
+                (oldestTimestamp + FIVE_MINUTES)
+                        - System.currentTimeMillis();
+
+        return Optional.of(
+                new NextExpiration(
+                        nextEntityType,
+                        Math.max(remaining, 0L)
+                )
+        );
     }
 }
